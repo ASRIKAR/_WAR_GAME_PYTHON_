@@ -1,0 +1,107 @@
+import random
+
+card_names = ["Hearts", "Kings", "Spades", "Diamonds"]
+ranks = ["Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King", "Ace"]
+ranks_dic = {"Two": 2, "Three": 3, "Four": 4, "Five": 5, "Six": 6, "Seven": 7, "Eight": 8, "Nine": 9, "Ten": 10,
+             "Jack": 11, "Queen": 12, "King": 13, "Ace": 14}
+
+class Card:
+    def __init__(self, card_number, card_name):
+        self.card_name = card_name
+        self.card_number = ranks_dic[card_number]
+
+    def __str__(self):
+        return f"{self.card_number} of {self.card_name}"
+
+
+class Deck:
+    def __init__(self):
+        self.all_cards = []
+        for card in card_names:
+            for rank in ranks:
+                self.all_cards.append(Card(rank, card))
+        random.shuffle(self.all_cards)
+
+    def retrieve_one_card(self):
+        return self.all_cards.pop()
+
+    def __str__(self):
+        return f"Total cards are {len(self.all_cards)}"
+
+
+class Player:
+    def __init__(self, player_name):
+        self.player_name = player_name
+        self.all_cards = []
+
+    def retrieve_one(self):
+        return self.all_cards.pop()
+
+    def add_cards(self, new_cards):
+        if isinstance(new_cards, list):
+            self.all_cards.extend(new_cards)
+        else:
+            self.all_cards.append(new_cards)
+
+    def __len__(self):
+        return len(self.all_cards)
+
+    def __str__(self):
+        return f'Player {self.player_name} has {len(self.all_cards)} cards'
+
+
+def game():
+    player1_name = input("Enter Player 1 name: ")
+    player2_name = input("Enter Player 2 name: ")
+
+    player1 = Player(player1_name)
+    player2 = Player(player2_name)
+
+    new_deck = Deck()
+
+    for i in range(26):
+        player1.add_cards(new_deck.retrieve_one_card())
+        player2.add_cards(new_deck.retrieve_one_card())
+
+    round_num = 1
+    while True:
+        print(f"Round {round_num}")
+
+        if len(player1) == 0:
+            print(f"{player2_name} wins!")
+            break
+        elif len(player2) == 0:
+            print(f"{player1_name} wins!")
+            break
+
+        player1_cards = []
+        player1_cards.append(player1.retrieve_one())
+        player2_cards = []
+        player2_cards.append(player2.retrieve_one())
+        is_war = True
+        while is_war:
+            print(f"{player1_name} plays: {player1_cards[-1]}")
+            print(f"{player2_name} plays: {player2_cards[-1]}")
+            if player1_cards[-1].card_number > player2_cards[-1].card_number:
+                player1.add_cards(player1_cards)
+                player1.add_cards(player2_cards)
+                print(f"{player1_name} wins the round!")
+                is_war = False
+            elif player2_cards[-1].card_number > player1_cards[-1].card_number:
+                player2.add_cards(player1_cards)
+                player2.add_cards(player2_cards)
+                print(f"{player2_name} wins the round!")
+                is_war = False
+            else:
+                print("War!")
+                if len(player1) < 5 or len(player2) < 5:
+                    print("Not enough cards for war. Game ends in a draw.")
+                    is_war = False
+                    break
+                else:
+                    for _ in range(5):
+                        player1_cards.append(player1.retrieve_one())
+                        player2_cards.append(player2.retrieve_one())
+        round_num += 1
+
+game()
